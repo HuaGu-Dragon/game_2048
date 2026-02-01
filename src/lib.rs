@@ -78,7 +78,7 @@ impl Game {
     fn save_best_score(&self) {
         let mut config_path = env::current_dir().unwrap();
         config_path.push("config");
-        if config_path.exists() == false {
+        if !config_path.exists() {
             fs::File::create(&config_path).ok();
         }
         fs::write(&config_path, self.best_score.to_string()).ok();
@@ -182,10 +182,7 @@ impl Game {
     // about core logic
     fn spawn_tile(&mut self, cx: &mut Context<Self>, flag: bool) -> Result<(), String> {
         let mut rng = rand::rng();
-        let mut nums: Vec<usize> = (0..16)
-            .into_iter()
-            .filter(|&i| self.datas[i] == 0)
-            .collect();
+        let mut nums: Vec<usize> = (0..16).filter(|&i| self.datas[i] == 0).collect();
         nums.shuffle(&mut rng);
         if flag {
             let idx = nums[0];
@@ -197,7 +194,7 @@ impl Game {
             self.new_tiles.push(Some(idx));
             cx.notify();
             return Ok(());
-        } else if nums.len() != 16 as usize {
+        } else if nums.len() != 16 {
             return Ok(());
         }
         Err("No more empty tile, you lose!".to_string())
@@ -215,7 +212,7 @@ impl Game {
                             flag = true;
                             self.datas[((j.abs()) * 4 + i) as usize] =
                                 self.datas[((k.abs()) * 4 + i) as usize];
-                            self.datas[((k.abs()) * 4 + i) as usize] = 0 as u32;
+                            self.datas[((k.abs()) * 4 + i) as usize] = 0;
                             break;
                         }
                     }
@@ -238,7 +235,9 @@ impl Game {
                 {
                     flag2 = true;
                     self.datas[((j.abs()) * 4 + i) as usize] <<= 1;
-                    self.score += self.datas[((j.abs()) * 4 + i) as usize];
+                    self.score = self
+                        .score
+                        .saturating_add(self.datas[((j.abs()) * 4 + i) as usize]);
                     (self.best_score < self.score).then(|| {
                         self.best_score = self.score;
                         self.save_best_score();
@@ -257,48 +256,48 @@ impl Game {
 impl Game {
     // about actions for keyboard and mouse
     fn move_up(&mut self, _: &Up, _window: &mut Window, cx: &mut Context<Self>) {
-        if self.is_started == false {
+        if !self.is_started {
             return;
         }
         let flag = self.merge(0, 0);
         self.new_tiles.clear();
-        if let Err(_) = self.spawn_tile(cx, flag) {
+        if self.spawn_tile(cx, flag).is_err() {
             self.is_started = false;
             self.is_game_over = true;
         };
         cx.notify();
     }
     fn move_left(&mut self, _: &Left, _window: &mut Window, cx: &mut Context<Self>) {
-        if self.is_started == false {
+        if !self.is_started {
             return;
         }
         let flag = self.merge(1, 0);
         self.new_tiles.clear();
-        if let Err(_) = self.spawn_tile(cx, flag) {
+        if self.spawn_tile(cx, flag).is_err() {
             self.is_started = false;
             self.is_game_over = true;
         };
         cx.notify();
     }
     fn move_down(&mut self, _: &Down, _window: &mut Window, cx: &mut Context<Self>) {
-        if self.is_started == false {
+        if !self.is_started {
             return;
         }
         let flag = self.merge(0, 3);
         self.new_tiles.clear();
-        if let Err(_) = self.spawn_tile(cx, flag) {
+        if self.spawn_tile(cx, flag).is_err() {
             self.is_started = false;
             self.is_game_over = true;
         };
         cx.notify();
     }
     fn move_right(&mut self, _: &Right, _window: &mut Window, cx: &mut Context<Self>) {
-        if self.is_started == false {
+        if !self.is_started {
             return;
         }
         let flag = self.merge(1, 3);
         self.new_tiles.clear();
-        if let Err(_) = self.spawn_tile(cx, flag) {
+        if self.spawn_tile(cx, flag).is_err() {
             self.is_started = false;
             self.is_game_over = true;
         };
