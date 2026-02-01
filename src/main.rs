@@ -1,5 +1,7 @@
-use game_2048::{Game, Up, Down, Left, Right, Enter};
-use gpui::{App, Application, AppContext, Bounds, KeyBinding, WindowBounds, WindowOptions, size, px};
+use game_2048::{Down, Enter, Game, Left, Right, Up};
+use gpui::{
+    App, AppContext, Application, Bounds, KeyBinding, WindowBounds, WindowOptions, px, size,
+};
 
 fn main() {
     Application::new().run(|cx: &mut App| {
@@ -21,7 +23,7 @@ fn main() {
                 window_bounds: Some(WindowBounds::Windowed(bounds)),
                 ..Default::default()
             },
-            |_, cx| cx.new(|cx| Game::new(cx)),
+            |_, cx| cx.new(Game::new),
         )
         .unwrap();
     });
