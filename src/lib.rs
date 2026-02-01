@@ -238,7 +238,9 @@ impl Game {
                 {
                     flag2 = true;
                     self.datas[((j.abs()) * 4 + i) as usize] <<= 1;
-                    self.score += self.datas[((j.abs()) * 4 + i) as usize];
+                    self.score = self
+                        .score
+                        .saturating_add(self.datas[((j.abs()) * 4 + i) as usize]);
                     (self.best_score < self.score).then(|| {
                         self.best_score = self.score;
                         self.save_best_score();
