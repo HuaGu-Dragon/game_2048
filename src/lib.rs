@@ -247,15 +247,6 @@ impl Game {
         flag1 | flag2
     }
     fn check_fail(&mut self) -> bool {
-        for i in 0..16 {
-            if i % 4 == 0 {
-                println!();
-            }
-            print!("{:4} ", self.datas[i]);
-            if i == 15 {
-                println!();
-            }
-        }
         let count = self.datas.iter().filter(|&&x| x == 0).count();
         if count != 0 {
             false
