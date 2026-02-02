@@ -88,6 +88,7 @@ impl Game {
         fs::write(&config_path, self.best_score.to_string()).ok();
     }
 }
+
 impl Game {
     // about render
     fn render_box(&self, label: &'static str, value: u32) -> impl IntoElement {
@@ -242,6 +243,7 @@ impl Game {
         }
         flag
     }
+
     fn merge(&mut self, dir: u32, pos: i32) -> bool {
         if dir == 1 {
             self.transpose();
@@ -274,6 +276,7 @@ impl Game {
         flag1 | flag2
     }
 }
+
 impl Game {
     // about actions for keyboard and mouse
     fn move_up(&mut self, _: &Up, _window: &mut Window, cx: &mut Context<Self>) {
@@ -288,6 +291,7 @@ impl Game {
         };
         cx.notify();
     }
+
     fn move_left(&mut self, _: &Left, _window: &mut Window, cx: &mut Context<Self>) {
         if !self.is_started {
             return;
@@ -300,6 +304,7 @@ impl Game {
         };
         cx.notify();
     }
+
     fn move_down(&mut self, _: &Down, _window: &mut Window, cx: &mut Context<Self>) {
         if !self.is_started {
             return;
@@ -312,6 +317,7 @@ impl Game {
         };
         cx.notify();
     }
+
     fn move_right(&mut self, _: &Right, _window: &mut Window, cx: &mut Context<Self>) {
         if !self.is_started {
             return;
@@ -324,6 +330,7 @@ impl Game {
         };
         cx.notify();
     }
+
     fn new_game_mouse(
         &mut self,
         _: &MouseDownEvent,
@@ -332,6 +339,7 @@ impl Game {
     ) {
         self.new_game(_window, _cx);
     }
+
     fn new_game_keyboard(&mut self, _: &Enter, _window: &mut Window, _cx: &mut Context<Self>) {
         self.new_game(_window, _cx);
     }
