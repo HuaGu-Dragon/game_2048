@@ -71,8 +71,8 @@ impl Game {
         self.new_tiles.clear();
         self.datas = vec![0; 16];
         self.is_game_over = false;
-        self.spawn_tile(cx, true).unwrap();
-        self.spawn_tile(cx, true).unwrap();
+        self.spawn_tile(cx);
+        self.spawn_tile(cx);
         cx.notify();
     }
     fn save_best_score(&self) {
@@ -180,24 +180,18 @@ impl Game {
 }
 impl Game {
     // about core logic
-    fn spawn_tile(&mut self, cx: &mut Context<Self>, flag: bool) -> Result<(), String> {
+    fn spawn_tile(&mut self, cx: &mut Context<Self>) {
         let mut rng = rand::rng();
         let mut nums: Vec<usize> = (0..16).filter(|&i| self.datas[i] == 0).collect();
         nums.shuffle(&mut rng);
-        if flag {
-            let idx = nums[0];
-            self.datas[idx] = match rng.random_bool(0.9) {
-                true => 2,
-                false => 4,
-            };
-            self.spawn_count += 1;
-            self.new_tiles.push(Some(idx));
-            cx.notify();
-            return Ok(());
-        } else if nums.len() != 16 {
-            return Ok(());
-        }
-        Err("No more empty tile, you lose!".to_string())
+        let idx = nums[0];
+        self.datas[idx] = match rng.random_bool(0.9) {
+            true => 2,
+            false => 4,
+        };
+        self.spawn_count += 1;
+        self.new_tiles.push(Some(idx));
+        cx.notify();
     }
     fn transpose(&mut self) {
         self.datas = (0..16).map(|i| self.datas[(i % 4) * 4 + i / 4]).collect();
@@ -252,6 +246,27 @@ impl Game {
         }
         flag1 | flag2
     }
+    fn check_fail(&mut self) -> bool {
+        let count = self.datas.iter().filter(|&&x| x == 0).count();
+        if count != 0 {
+            return false;
+        } else {
+            let v = self.datas.clone();
+            let ops: [i32; 4] = [-4, -1, 1, 4];
+            for i in 0..16 as i32 {
+                if v[i as usize] != 0 {
+                    for op in ops {
+                        if i + op >= 0 && i + op < 16 {
+                            if v[i as usize] == v[(i + op) as usize] {
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+            false
+        }
+    }
 }
 impl Game {
     // about actions for keyboard and mouse
@@ -259,9 +274,11 @@ impl Game {
         if !self.is_started {
             return;
         }
-        let flag = self.merge(0, 0);
         self.new_tiles.clear();
-        if self.spawn_tile(cx, flag).is_err() {
+        if self.merge(0, 0) {
+            self.spawn_tile(cx);
+        }
+        if self.check_fail() {
             self.is_started = false;
             self.is_game_over = true;
         };
@@ -271,9 +288,11 @@ impl Game {
         if !self.is_started {
             return;
         }
-        let flag = self.merge(1, 0);
         self.new_tiles.clear();
-        if self.spawn_tile(cx, flag).is_err() {
+        if self.merge(1, 0) {
+            self.spawn_tile(cx);
+        }
+        if self.check_fail() {
             self.is_started = false;
             self.is_game_over = true;
         };
@@ -283,9 +302,11 @@ impl Game {
         if !self.is_started {
             return;
         }
-        let flag = self.merge(0, 3);
         self.new_tiles.clear();
-        if self.spawn_tile(cx, flag).is_err() {
+        if self.merge(0, 3) {
+            self.spawn_tile(cx);
+        }
+        if self.check_fail() {
             self.is_started = false;
             self.is_game_over = true;
         };
@@ -295,9 +316,11 @@ impl Game {
         if !self.is_started {
             return;
         }
-        let flag = self.merge(1, 3);
         self.new_tiles.clear();
-        if self.spawn_tile(cx, flag).is_err() {
+        if self.merge(1, 3) {
+            self.spawn_tile(cx);
+        }
+        if self.check_fail() {
             self.is_started = false;
             self.is_game_over = true;
         };
